@@ -199,7 +199,10 @@ const gmaps=i=>i.lat&&i.lon?`https://www.google.com/maps/search/?api=1&query=${i
 function initMapa(){
   if(map) return;
   map=L.map("map",{zoomControl:true,attributionControl:false}).setView([20.85,-86.95],8);
-  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",{maxZoom:19}).addTo(map);
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19}).addTo(map);
+  // atenuar el mapa claro para que combine con el tema oscuro
+  const p=document.querySelector(".leaflet-tile-pane");
+  if(p) p.style.filter="invert(1) hue-rotate(180deg) brightness(.92) contrast(.88) saturate(.6)";
 }
 function pinIcon(color,ico){
   return L.divIcon({className:"",html:`<div style="background:${color};width:26px;height:26px;
