@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Viajes · Himura</title>
+<meta name="theme-color" content="#0e7490">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:-apple-system,"Segoe UI",Roboto,sans-serif;background:#0a0e14;color:#e6edf3;
+       min-height:100vh;padding:20px 16px 80px}
+  .wrap{max-width:760px;margin:0 auto}
+  header{text-align:center;margin-bottom:22px}
+  .logo{width:58px;height:58px;border-radius:17px;background:linear-gradient(135deg,#22d3ee,#0e7490);
+        display:grid;place-items:center;font-size:28px;margin:0 auto 10px;box-shadow:0 0 40px rgba(34,211,238,.25)}
+  h1{font-size:1.25rem} .sub{color:#8b98a9;font-size:.83rem;margin-top:3px}
+
+  .filtros{display:flex;gap:6px;background:#10161f;padding:5px;border-radius:13px;margin-bottom:14px}
+  .f{flex:1;text-align:center;padding:10px 6px;border-radius:9px;font-size:.85rem;font-weight:600;
+     color:#8b98a9;cursor:pointer;border:0;background:transparent}
+  .f.on{background:#0e7490;color:#fff}
+
+  .dest{background:#121821;border:1px solid #1e2836;border-radius:16px;margin-bottom:14px;overflow:hidden}
+  .dhead{padding:15px 16px;cursor:pointer;display:flex;align-items:center;justify-content:space-between}
+  .dhead h2{font-size:1.05rem;display:flex;align-items:center;gap:8px}
+  .chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+  .chip{font-size:.68rem;padding:2px 8px;border-radius:20px;font-weight:600}
+  .c-w{background:#1e3a5f;color:#7cc4ff} .c-c{background:#14432a;color:#4ade80} .c-d{background:#3a2a2a;color:#d99}
+  .arrow{color:#5d6875;font-size:1.1rem;transition:transform .2s}
+  .dest.open .arrow{transform:rotate(90deg)}
+  .dbody{display:none;padding:0 16px 14px} .dest.open .dbody{display:block}
+
+  .cat{margin-top:14px}
+  .cat h3{font-size:.72rem;color:#7b8797;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px}
+  .it{background:#0d131c;border:1px solid #1b2431;border-radius:12px;padding:11px 13px;margin-bottom:7px}
+  .it.desc{opacity:.5}
+  .it .tx{font-size:.94rem;line-height:1.45}
+  .it.desc .tx{text-decoration:line-through}
+  .it .meta{color:#6b7684;font-size:.74rem;margin-top:5px}
+  .it .nota{color:#94a3b8;font-size:.8rem;margin-top:6px;line-height:1.45;
+            max-height:3.3em;overflow:hidden;cursor:pointer}
+  .it .nota.full{max-height:none}
+  .acts{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
+  .acts button{background:#1a2432;color:#b8c4d0;border:0;border-radius:8px;padding:6px 11px;
+               font-size:.76rem;cursor:pointer;font-family:inherit}
+  .acts button:hover{background:#243244}
+  .acts .on{background:#0e7490;color:#fff}
+
+  .add{background:#121821;border:1px solid #1e2836;border-radius:16px;padding:16px;margin-top:18px}
+  .add h3{font-size:.95rem;margin-bottom:12px}
+  .add input,.add select,.add textarea{width:100%;background:#0a0e14;border:1px solid #1e2836;color:#e6edf3;
+      border-radius:10px;padding:11px 13px;font-size:.9rem;font-family:inherit;margin-bottom:9px}
+  .add textarea{resize:vertical;min-height:60px}
+  .row{display:flex;gap:9px} .row>*{flex:1}
+  .btn{background:#0e7490;color:#fff;border:0;border-radius:11px;padding:13px;font-size:.93rem;
+       font-weight:600;cursor:pointer;width:100%;font-family:inherit}
+  .empty{color:#6b7684;text-align:center;padding:36px 12px;font-size:.88rem;line-height:1.6}
+  .msg{text-align:center;font-size:.83rem;padding:9px;border-radius:9px;margin-top:9px;display:none}
+  .msg.ok{background:#14432a;color:#4ade80;display:block}
+  .msg.err{background:#3a2020;color:#ff8080;display:block}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">✈️</div>
+    <h1>Viajes</h1>
+    <div class="sub" id="sub">Cargando…</div>
+  </header>
+
+  <div class="filtros">
+    <button class="f on" data-e="todos">Todo</button>
+    <button class="f" data-e="wishlist">💭 Wishlist</button>
+    <button class="f" data-e="confirmado">✅ Confirmado</button>
+    <button class="f" data-e="descartado">🗂 Descartado</button>
+  </div>
+
+  <div id="cont"><div class="empty">Cargando…</div></div>
+
+  <div class="add">
+    <h3>➕ Agregar</h3>
+    <input id="n-text" placeholder="Qué es (ej: Cenote Dos Ojos)">
+    <div class="row">
+      <input id="n-dest" placeholder="Destino (ej: Tulum)" list="destinos">
+      <datalist id="destinos"></datalist>
+      <select id="n-cat">
+        <option value="hospedaje">🏨 Hospedaje</option>
+        <option value="comida">🍽 Comida</option>
+        <option value="actividad" selected>🎯 Actividad</option>
+        <option value="lugar">📍 Lugar de interés</option>
+        <option value="otro">📎 Otro</option>
+      </select>
+    </div>
+    <select id="n-est">
+      <option value="wishlist" selected>💭 Wishlist (idea)</option>
+      <option value="confirmado">✅ Confirmado</option>
+    </select>
+    <textarea id="n-nota" placeholder="Nota (opcional): precio, horario, link, quién lo recomendó…"></textarea>
+    <button class="btn" id="n-btn">Agregar</button>
+    <div class="msg" id="n-msg"></div>
+  </div>
+</div>
+
+<script>
+const BACKEND = "https://masters-classic-bibliographic-cart.trycloudflare.com";
+const CATS = {hospedaje:"🏨 Hospedaje", comida:"🍽 Comida", actividad:"🎯 Actividades",
+              lugar:"📍 Lugares de interés", otro:"📎 Otros"};
+const EST = {wishlist:"💭", confirmado:"✅", descartado:"🗂"};
+let DATA = [], filtro = "todos", abiertos = new Set();
+
+function esc(s){return (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+
+function pin(){
+  let p = sessionStorage.getItem("vpin");
+  if(!p){ p = prompt("PIN para editar:"); if(p) sessionStorage.setItem("vpin", p); }
+  return p;
+}
+async function api(path, body){
+  const r = await fetch(BACKEND+path,{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({pin:pin(),...body})});
+  if(r.status===403){ sessionStorage.removeItem("vpin"); throw new Error("PIN incorrecto"); }
+  if(!r.ok) throw new Error("Error "+r.status);
+  return r.json();
+}
+
+async function load(){
+  try{
+    const r = await (await fetch(BACKEND+"/viajes")).json();
+    DATA = r.destinos;
+    const tot = DATA.reduce((a,d)=>a+d.total,0), cf = DATA.reduce((a,d)=>a+d.confirmado,0);
+    document.getElementById("sub").textContent = `${tot} items · ${cf} confirmados · ${DATA.length} destinos`;
+    document.getElementById("destinos").innerHTML = DATA.map(d=>`<option value="${esc(d.destino)}">`).join("");
+    render();
+  }catch(e){ document.getElementById("cont").innerHTML='<div class="empty">No se pudo cargar.<br>'+e.message+'</div>'; }
+}
+
+function render(){
+  const cont = document.getElementById("cont");
+  const dd = DATA.map(d=>({...d, items: d.items.filter(i=> filtro==="todos" || i.estado===filtro)}))
+                 .filter(d=>d.items.length);
+  if(!dd.length){ cont.innerHTML='<div class="empty">Nada en esta vista.</div>'; return; }
+  cont.innerHTML = dd.map(d=>{
+    const porCat = {};
+    d.items.forEach(i=>{ (porCat[i.categoria] ||= []).push(i); });
+    const cuerpo = Object.keys(CATS).filter(c=>porCat[c]).map(c=>`
+      <div class="cat"><h3>${CATS[c]}</h3>
+        ${porCat[c].map(i=>item(i)).join("")}
+      </div>`).join("");
+    return `<div class="dest ${abiertos.has(d.destino)?"open":""}" data-d="${esc(d.destino)}">
+      <div class="dhead">
+        <div><h2>${esc(d.destino)}</h2>
+          <div class="chips">
+            ${d.wishlist?`<span class="chip c-w">💭 ${d.wishlist}</span>`:""}
+            ${d.confirmado?`<span class="chip c-c">✅ ${d.confirmado}</span>`:""}
+            ${d.descartado?`<span class="chip c-d">🗂 ${d.descartado}</span>`:""}
+          </div></div>
+        <span class="arrow">›</span>
+      </div>
+      <div class="dbody">${cuerpo}</div></div>`;
+  }).join("");
+  bind();
+}
+
+function item(i){
+  return `<div class="it ${i.estado==="descartado"?"desc":""}" data-id="${i.id}">
+    <div class="tx">${EST[i.estado]||""} ${esc(i.text)}</div>
+    ${i.zona?`<div class="meta">📍 ${esc(i.zona)}</div>`:""}
+    ${i.nota?`<div class="nota">${esc(i.nota)}</div>`:""}
+    <div class="acts">
+      <button data-a="wishlist"   class="${i.estado==="wishlist"?"on":""}">💭 Wishlist</button>
+      <button data-a="confirmado" class="${i.estado==="confirmado"?"on":""}">✅ Confirmar</button>
+      <button data-a="descartado" class="${i.estado==="descartado"?"on":""}">🗂 Descartar</button>
+      <button data-a="del">🗑</button>
+    </div></div>`;
+}
+
+function bind(){
+  document.querySelectorAll(".dhead").forEach(h=>h.addEventListener("click",()=>{
+    const d = h.closest(".dest"), n = d.dataset.d;
+    d.classList.toggle("open");
+    d.classList.contains("open") ? abiertos.add(n) : abiertos.delete(n);
+  }));
+  document.querySelectorAll(".nota").forEach(n=>n.addEventListener("click",e=>{
+    e.stopPropagation(); n.classList.toggle("full");
+  }));
+  document.querySelectorAll(".acts button").forEach(b=>b.addEventListener("click",async e=>{
+    e.stopPropagation();
+    const id = b.closest(".it").dataset.id, a = b.dataset.a;
+    try{
+      if(a==="del"){ if(!confirm("¿Borrar definitivamente?\n(Si solo no lo vas a hacer ahora, usá Descartar: queda guardado.)")) return;
+        await api("/viajes/delete",{id}); }
+      else await api("/viajes/update",{id,estado:a});
+      load();
+    }catch(err){ alert(err.message); }
+  }));
+}
+
+document.querySelectorAll(".f").forEach(f=>f.addEventListener("click",()=>{
+  document.querySelectorAll(".f").forEach(x=>x.classList.remove("on"));
+  f.classList.add("on"); filtro = f.dataset.e; render();
+}));
+
+document.getElementById("n-btn").addEventListener("click",async ()=>{
+  const g = id=>document.getElementById(id).value.trim();
+  const msg = document.getElementById("n-msg");
+  if(!g("n-text")){ msg.className="msg err"; msg.textContent="Falta el nombre"; return; }
+  try{
+    await api("/viajes/add",{text:g("n-text"),destino:g("n-dest"),categoria:g("n-cat"),
+      estado:g("n-est"),nota:g("n-nota"),addedBy:"web"});
+    ["n-text","n-nota"].forEach(i=>document.getElementById(i).value="");
+    msg.className="msg ok"; msg.textContent="✓ Agregado";
+    setTimeout(()=>msg.className="msg",2000);
+    load();
+  }catch(e){ msg.className="msg err"; msg.textContent=e.message; }
+});
+
+load();
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden) load(); });
+</script>
+</body>
+</html>
