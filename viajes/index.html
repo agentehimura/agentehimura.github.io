@@ -2,105 +2,142 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Viajes · Himura</title>
 <meta name="theme-color" content="#0e7490">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-  body{font-family:-apple-system,"Segoe UI",Roboto,sans-serif;background:#0a0e14;color:#e6edf3;
-       min-height:100vh;padding:16px 14px 96px;font-size:15px}
-  .wrap{max-width:780px;margin:0 auto}
+  body{font-family:-apple-system,"Segoe UI",Roboto,sans-serif;background:#0a0e14;color:#e6edf3;font-size:15px}
+  .wrap{max-width:820px;margin:0 auto;padding-bottom:92px}
 
-  .top{display:flex;align-items:center;gap:11px;margin-bottom:14px}
-  .logo{width:44px;height:44px;border-radius:13px;background:linear-gradient(135deg,#22d3ee,#0e7490);
-        display:grid;place-items:center;font-size:21px;flex:0 0 auto}
-  .top h1{font-size:1.1rem;line-height:1.25}
-  .top .sub{color:#8b98a9;font-size:.78rem;margin-top:2px}
+  .hdr{padding:13px 15px;display:flex;align-items:center;gap:11px;border-bottom:1px solid #172030}
+  .hdr h1{font-size:1.08rem;line-height:1.2}
+  .hdr .s{color:#8b98a9;font-size:.76rem;margin-top:2px}
+  .logo{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#22d3ee,#0e7490);
+        display:grid;place-items:center;font-size:19px;flex:0 0 auto}
 
-  .tabs{display:flex;gap:5px;background:#10161f;padding:5px;border-radius:13px;margin-bottom:16px}
-  .tab{flex:1;text-align:center;padding:11px 4px;border-radius:9px;font-size:.83rem;font-weight:600;
-       color:#8b98a9;cursor:pointer;border:0;background:transparent;font-family:inherit}
-  .tab.on{background:#0e7490;color:#fff}
+  #map{height:290px;width:100%;background:#0d131c;z-index:1}
+  .leyenda{display:flex;gap:5px;overflow-x:auto;padding:9px 12px;background:#0d131c;
+           border-bottom:1px solid #172030;-ms-overflow-style:none;scrollbar-width:none}
+  .leyenda::-webkit-scrollbar{display:none}
+  .lg{display:flex;align-items:center;gap:5px;font-size:.71rem;color:#8b98a9;background:#121a26;
+      border:1px solid #1e2836;padding:5px 10px;border-radius:20px;white-space:nowrap;cursor:pointer}
+  .lg.off{opacity:.35}
+  .dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
 
-  /* ---- itinerario ---- */
-  .dia{background:#121821;border:1px solid #1e2836;border-radius:15px;margin-bottom:10px;overflow:hidden}
-  .dia.hoy{border-color:#0e7490}
-  .dhead{padding:13px 15px;cursor:pointer;display:flex;align-items:center;gap:12px}
-  .dnum{width:42px;height:42px;border-radius:11px;background:#0d131c;display:grid;place-items:center;
-        flex:0 0 auto;line-height:1.1;text-align:center}
-  .dnum b{font-size:1.05rem;display:block} .dnum span{font-size:.62rem;color:#7b8797}
-  .dinfo{flex:1;min-width:0}
-  .dinfo .f{font-size:.93rem;font-weight:600}
-  .dinfo .h{color:#8b98a9;font-size:.78rem;margin-top:3px;display:flex;align-items:center;gap:5px;flex-wrap:wrap}
-  .badge{font-size:.64rem;padding:2px 7px;border-radius:20px;font-weight:700;letter-spacing:.02em}
-  .b-in{background:#14432a;color:#4ade80} .b-out{background:#3a2a20;color:#fbbf24}
-  .cnt{font-size:.72rem;color:#6b7684;flex:0 0 auto}
-  .dbody{display:none;padding:0 15px 13px} .dia.open .dbody{display:block}
+  .tabs{display:flex;background:#0d131c;border-bottom:1px solid #172030;position:sticky;top:0;z-index:20}
+  .tab{flex:1;padding:13px 4px;font-size:.8rem;font-weight:600;color:#8b98a9;cursor:pointer;
+       border:0;background:transparent;border-bottom:2px solid transparent;font-family:inherit}
+  .tab.on{color:#22d3ee;border-bottom-color:#0e7490}
 
-  /* ---- items ---- */
-  .it{background:#0d131c;border:1px solid #1b2431;border-radius:12px;padding:11px 13px;margin-bottom:7px}
-  .it.desc{opacity:.45} .it.hecho .tx{text-decoration:line-through;color:#5d6875}
-  .it .tx{font-size:.92rem;line-height:1.45;display:flex;gap:7px;align-items:flex-start}
-  .it .meta{color:#6b7684;font-size:.74rem;margin-top:5px;line-height:1.5}
-  .it .nota{color:#94a3b8;font-size:.79rem;margin-top:6px;line-height:1.5;
-            max-height:3.2em;overflow:hidden;cursor:pointer}
-  .it .nota.full{max-height:none}
-  .acts{display:flex;gap:5px;margin-top:9px;flex-wrap:wrap}
-  .acts button,.acts a{background:#1a2432;color:#b8c4d0;border:0;border-radius:8px;padding:6px 10px;
-       font-size:.73rem;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-block}
-  .acts .on{background:#0e7490;color:#fff}
-  .acts .map{background:#1e3a5f;color:#93c5fd}
+  .pad{padding:15px}
+  h2.sec{font-size:.68rem;color:#6b7684;text-transform:uppercase;letter-spacing:.09em;margin-bottom:11px;line-height:1.5}
 
-  .cat{margin-top:13px}
-  .cat h3{font-size:.7rem;color:#7b8797;text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px}
+  /* itinerario */
+  .tr{display:flex;gap:11px;padding:9px 0 9px 4px}
+  .tr .ico{font-size:1.05rem;flex:0 0 auto;width:24px;text-align:center}
+  .tr .c{flex:1;min-width:0;border-left:2px solid #1e2836;padding-left:13px;padding-bottom:4px}
+  .tr .t{font-size:.7rem;font-weight:700;color:#22d3ee;letter-spacing:.06em}
+  .tr .d{color:#8b98a9;font-size:.81rem;margin-top:3px;line-height:1.5}
+  .tr .n{color:#6b7684;font-size:.76rem;margin-top:4px;line-height:1.5}
 
-  .dest{background:#121821;border:1px solid #1e2836;border-radius:15px;margin-bottom:11px;overflow:hidden}
-  .dhead2{padding:13px 15px;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
-  .dhead2 h2{font-size:.98rem}
-  .arrow{color:#5d6875;transition:transform .2s} .open>.dhead2 .arrow,.dia.open .arrow{transform:rotate(90deg)}
-  .dest .dbody{display:none} .dest.open .dbody{display:block}
+  .par{background:#121821;border:1px solid #1e2836;border-radius:15px;margin:9px 0;overflow:hidden}
+  .par.open{border-color:#1b3a4a}
+  .ph{padding:13px 15px;cursor:pointer;display:flex;align-items:center;gap:12px}
+  .pn{width:30px;height:30px;border-radius:9px;background:#0e7490;color:#fff;display:grid;
+      place-items:center;font-weight:700;font-size:.85rem;flex:0 0 auto}
+  .pi{flex:1;min-width:0}
+  .pi b{font-size:1rem} .pi .x{color:#8b98a9;font-size:.77rem;margin-top:3px}
+  .pb{display:none;padding:0 15px 14px} .par.open .pb{display:block}
+  .arrow{color:#5d6875;transition:transform .2s;flex:0 0 auto}
+  .par.open .arrow,.dia.open .arrow,.dest.open .arrow{transform:rotate(90deg)}
 
-  .hotel{background:linear-gradient(135deg,rgba(34,211,238,.08),transparent);
-         border:1px solid #1b3a4a;border-radius:12px;padding:11px 13px;margin-bottom:9px}
-  .hotel .n{font-weight:700;font-size:.9rem} .hotel .d{color:#8b98a9;font-size:.76rem;margin-top:4px;line-height:1.5}
+  .hot{background:linear-gradient(135deg,rgba(34,211,238,.07),transparent);border:1px solid #1b3a4a;
+       border-radius:12px;padding:12px 13px;margin-bottom:10px}
+  .hot .n{font-weight:700;font-size:.92rem}
+  .hot .d{color:#8b98a9;font-size:.77rem;margin-top:5px;line-height:1.55}
 
-  .fab{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);width:calc(100% - 28px);
-       max-width:780px;display:flex;gap:8px}
+  /* dias */
+  .dia{background:#121821;border:1px solid #1e2836;border-radius:14px;margin-bottom:8px;overflow:hidden}
+  .dh{padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:11px}
+  .dn{width:40px;text-align:center;flex:0 0 auto;line-height:1.15}
+  .dn b{font-size:.98rem;display:block} .dn span{font-size:.6rem;color:#7b8797;text-transform:uppercase}
+  .di{flex:1;min-width:0}
+  .di .a{font-size:.9rem;font-weight:600} .di .b{color:#8b98a9;font-size:.75rem;margin-top:3px}
+  .db{display:none;padding:0 14px 12px} .dia.open .db{display:block}
+  .ev{display:flex;gap:10px;padding:8px 0;border-top:1px solid #1a2330}
+  .ev:first-child{border-top:0}
+  .ev .h{color:#22d3ee;font-size:.74rem;font-weight:700;width:42px;flex:0 0 auto;padding-top:2px}
+  .ev .x{flex:1;min-width:0;font-size:.88rem;line-height:1.45}
+  .ev .x small{display:block;color:#7b8797;font-size:.75rem;margin-top:3px;line-height:1.5}
+  .tag{font-size:.6rem;padding:2px 6px;border-radius:5px;font-weight:700;margin-right:5px;
+       background:#14432a;color:#4ade80;letter-spacing:.03em}
+  .tag.o{background:#3a2a20;color:#fbbf24} .tag.t{background:#1e3a5f;color:#7cc4ff}
+
+  /* lugares */
+  .dest{background:#121821;border:1px solid #1e2836;border-radius:15px;margin-bottom:10px;overflow:hidden}
+  .dhh{padding:13px 15px;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+  .dhh b{font-size:.97rem} .dhh .c{color:#6b7684;font-size:.74rem;margin-top:3px}
+  .dest .bd{display:none;padding:0 15px 13px} .dest.open .bd{display:block}
+  .cat h3{font-size:.67rem;color:#7b8797;text-transform:uppercase;letter-spacing:.07em;margin:13px 0 7px}
+
+  .it{background:#0d131c;border:1px solid #1b2431;border-radius:11px;padding:10px 12px;margin-bottom:6px}
+  .it.desc{opacity:.42} .it.hecho .tx{text-decoration:line-through;color:#5d6875}
+  .it .tx{font-size:.9rem;line-height:1.45;display:flex;gap:7px}
+  .it .m{color:#6b7684;font-size:.73rem;margin-top:4px;line-height:1.5}
+  .it .nt{color:#94a3b8;font-size:.78rem;margin-top:5px;line-height:1.5;max-height:3em;overflow:hidden;cursor:pointer}
+  .it .nt.full{max-height:none}
+  .acts{display:flex;gap:4px;margin-top:8px;flex-wrap:wrap}
+  .acts button,.acts a{background:#1a2432;color:#b8c4d0;border:0;border-radius:7px;padding:5px 9px;
+    font-size:.71rem;cursor:pointer;font-family:inherit;text-decoration:none}
+  .acts .on{background:#0e7490;color:#fff} .acts .map{background:#1e3a5f;color:#93c5fd}
+
+  .fab{position:fixed;bottom:15px;left:50%;transform:translateX(-50%);width:calc(100% - 26px);
+       max-width:820px;display:flex;gap:8px;z-index:30}
   .fab button{flex:1;background:#0e7490;color:#fff;border:0;border-radius:12px;padding:13px;
-              font-size:.88rem;font-weight:600;cursor:pointer;font-family:inherit}
-  .fab .g{background:#151c28;border:1px solid #1f2a3a;color:#8b98a9;flex:0 0 52px}
+              font-size:.87rem;font-weight:600;cursor:pointer;font-family:inherit;
+              box-shadow:0 6px 22px rgba(0,0,0,.5)}
+  .fab .g{flex:0 0 50px;background:#151c28;border:1px solid #1f2a3a;color:#8b98a9}
 
-  .modal{position:fixed;inset:0;background:rgba(5,8,12,.8);display:none;z-index:50;
-         align-items:flex-end;justify-content:center}
+  .modal{position:fixed;inset:0;background:rgba(4,7,11,.82);display:none;z-index:60;align-items:flex-end}
   .modal.on{display:flex}
-  .sheet{background:#111823;border:1px solid #1e2836;border-radius:20px 20px 0 0;padding:20px 17px 26px;
-         width:100%;max-width:780px;max-height:88vh;overflow-y:auto}
-  .sheet h3{font-size:1rem;margin-bottom:14px}
-  .sheet label{display:block;font-size:.73rem;color:#7b8797;margin:9px 0 4px;text-transform:uppercase;letter-spacing:.05em}
+  .sheet{background:#111823;border-radius:20px 20px 0 0;padding:19px 16px 26px;width:100%;
+         max-width:820px;margin:0 auto;max-height:90vh;overflow-y:auto}
+  .sheet h3{font-size:1rem;margin-bottom:13px}
+  .sheet label{display:block;font-size:.69rem;color:#7b8797;margin:9px 0 4px;text-transform:uppercase;letter-spacing:.06em}
   .sheet input,.sheet select,.sheet textarea{width:100%;background:#0a0e14;border:1px solid #1e2836;
-      color:#e6edf3;border-radius:10px;padding:11px 13px;font-size:.9rem;font-family:inherit}
-  .sheet textarea{resize:vertical;min-height:58px}
-  .row{display:flex;gap:9px} .row>*{flex:1}
-  .empty{color:#6b7684;text-align:center;padding:34px 12px;font-size:.87rem;line-height:1.65}
-  .msg{text-align:center;font-size:.82rem;padding:9px;border-radius:9px;margin-top:10px;display:none}
-  .msg.ok{background:#14432a;color:#4ade80;display:block}
+    color:#e6edf3;border-radius:10px;padding:11px 12px;font-size:.89rem;font-family:inherit}
+  .sheet textarea{resize:vertical;min-height:56px}
+  .row{display:flex;gap:8px} .row>*{flex:1}
+  .bt{border:0;border-radius:11px;padding:13px;font-size:.88rem;font-weight:600;cursor:pointer;font-family:inherit}
+  .bt.p{background:#0e7490;color:#fff} .bt.s{background:#1a2432;color:#b8c4d0}
+  .empty{color:#6b7684;text-align:center;padding:30px 12px;font-size:.86rem;line-height:1.65}
+  .msg{text-align:center;font-size:.81rem;padding:9px;border-radius:9px;margin-top:9px;display:none}
   .msg.err{background:#3a2020;color:#ff8080;display:block}
+  .leaflet-popup-content-wrapper{background:#121821;color:#e6edf3;border-radius:11px}
+  .leaflet-popup-tip{background:#121821}
+  .leaflet-container{background:#0d131c}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="top">
+  <div class="hdr">
     <div class="logo">✈️</div>
-    <div><h1 id="vnom">Cargando…</h1><div class="sub" id="vsub"></div></div>
+    <div><h1 id="vnom">Cargando…</h1><div class="s" id="vsub"></div></div>
   </div>
 
+  <div id="map"></div>
+  <div class="leyenda" id="leyenda"></div>
+
   <div class="tabs">
-    <button class="tab on" data-v="itin">📅 Itinerario</button>
-    <button class="tab" data-v="ideas">💡 Ideas</button>
+    <button class="tab on" data-v="resumen">🗺️ Resumen</button>
+    <button class="tab" data-v="lugares">📍 Lugares</button>
+    <button class="tab" data-v="dias">📅 Días</button>
     <button class="tab" data-v="pend">✅ Pendientes</button>
   </div>
 
-  <div id="cont"><div class="empty">Cargando…</div></div>
+  <div class="pad" id="cont"><div class="empty">Cargando…</div></div>
 </div>
 
 <div class="fab">
@@ -111,166 +148,227 @@
 <div class="modal" id="modal"><div class="sheet">
   <h3 id="mtit">Agregar</h3>
   <label>Qué es</label>
-  <input id="f-text" placeholder="Ej: Cenote Dos Ojos / Alquilar auto">
+  <input id="f-text" placeholder="Ej: Cenote Dos Ojos">
   <div class="row">
-    <div><label>Tipo</label>
-      <select id="f-tipo">
-        <option value="idea">💡 Idea / lugar</option>
-        <option value="pendiente">✅ Pendiente (tarea)</option>
-      </select></div>
-    <div><label>Categoría</label>
-      <select id="f-cat">
-        <option value="actividad">🎯 Actividad</option>
-        <option value="comida">🍽 Comida</option>
-        <option value="lugar">📍 Lugar</option>
-        <option value="hospedaje">🏨 Hospedaje</option>
-        <option value="transporte">🚗 Transporte</option>
-        <option value="tramite">📋 Trámite / servicio</option>
-        <option value="otro">📎 Otro</option>
-      </select></div>
+    <div><label>Tipo</label><select id="f-tipo">
+      <option value="lugar">📍 Lugar / actividad</option>
+      <option value="pendiente">✅ Pendiente (tarea)</option>
+    </select></div>
+    <div><label>Categoría</label><select id="f-cat"></select></div>
   </div>
   <div class="row">
-    <div><label>Destino</label><input id="f-dest" list="dl-dest" placeholder="Cancún"><datalist id="dl-dest"></datalist></div>
-    <div><label>Fecha (opcional)</label><input id="f-fecha" type="date"></div>
+    <div><label>Destino</label><input id="f-dest" list="dl" placeholder="Cancún"><datalist id="dl"></datalist></div>
+    <div><label>Fecha</label><input id="f-fecha" type="date"></div>
   </div>
   <div class="row">
     <div><label>Hora</label><input id="f-hora" type="time"></div>
-    <div><label>Estado</label>
-      <select id="f-est">
-        <option value="wishlist">💭 Idea</option>
-        <option value="confirmado">✅ Confirmado</option>
-      </select></div>
+    <div><label>Estado</label><select id="f-est">
+      <option value="wishlist">💭 Idea</option><option value="confirmado">✅ Confirmado</option>
+    </select></div>
   </div>
   <label>Nota</label>
-  <textarea id="f-nota" placeholder="Precio, horario, quién lo recomendó, link…"></textarea>
+  <textarea id="f-nota" placeholder="Precio, horario, quién lo recomendó…"></textarea>
   <div class="msg" id="f-msg"></div>
-  <div class="row" style="margin-top:14px">
-    <button class="tab" id="f-cancel" style="background:#1a2432;color:#b8c4d0;padding:13px">Cancelar</button>
-    <button class="tab" id="f-save" style="background:#0e7490;color:#fff;padding:13px">Guardar</button>
+  <div class="row" style="margin-top:13px">
+    <button class="bt s" id="f-cancel">Cancelar</button>
+    <button class="bt p" id="f-save">Guardar</button>
   </div>
 </div></div>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-const BACKEND = "https://masters-classic-bibliographic-cart.trycloudflare.com";
-const SLUG = new URLSearchParams(location.search).get("v") || "mexico-2027";
-const CATS = {hospedaje:"🏨 Hospedaje",comida:"🍽 Comida",actividad:"🎯 Actividades",
-              lugar:"📍 Lugares",transporte:"🚗 Transporte",tramite:"📋 Trámites y servicios",otro:"📎 Otros"};
-const ICO = {hospedaje:"🏨",comida:"🍽",actividad:"🎯",lugar:"📍",transporte:"🚗",tramite:"📋",otro:"📎"};
-let D = null, vista = "itin", abiertos = new Set(), editId = null;
+const BACKEND="https://masters-classic-bibliographic-cart.trycloudflare.com";
+const SLUG=new URLSearchParams(location.search).get("v")||"mexico-2027";
+let D=null,vista="resumen",abiertos=new Set(),editId=null,map=null,capas={},ocultas=new Set();
 
-const esc = s => (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const $ = id => document.getElementById(id);
-function pin(){ let p=sessionStorage.getItem("vpin"); if(!p){p=prompt("PIN para editar:"); if(p)sessionStorage.setItem("vpin",p);} return p; }
-async function api(path, body){
-  const r = await fetch(BACKEND+path,{method:"POST",headers:{"Content-Type":"application/json"},
+const esc=s=>(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const $=id=>document.getElementById(id);
+const fmt=f=>f?f.split("-").reverse().slice(0,2).join("/"):"";
+function pin(){let p=sessionStorage.getItem("vpin");if(!p){p=prompt("PIN para editar:");if(p)sessionStorage.setItem("vpin",p);}return p;}
+async function api(path,body){
+  const r=await fetch(BACKEND+path,{method:"POST",headers:{"Content-Type":"application/json"},
     body:JSON.stringify({pin:pin(),...body})});
-  if(r.status===403){ sessionStorage.removeItem("vpin"); throw new Error("PIN incorrecto"); }
-  if(!r.ok) throw new Error("Error "+r.status);
+  if(r.status===403){sessionStorage.removeItem("vpin");throw new Error("PIN incorrecto");}
+  if(!r.ok)throw new Error("Error "+r.status);
   return r.json();
 }
-const mapUrl = i => i.lat&&i.lon ? `https://www.google.com/maps/search/?api=1&query=${i.lat},${i.lon}`
-                  : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((i.text||"")+" "+(i.destino||""))}`;
+const gmaps=i=>i.lat&&i.lon?`https://www.google.com/maps/search/?api=1&query=${i.lat},${i.lon}`
+  :`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((i.text||i.nombre||"")+" "+(i.destino||""))}`;
 
-async function load(){
-  try{
-    D = await (await fetch(BACKEND+"/viajes/"+SLUG)).json();
-    const v = D.viaje;
-    $("vnom").textContent = v.nombre;
-    const f = s => s ? s.split("-").reverse().slice(0,2).join("/") : "";
-    $("vsub").textContent = `${f(v.desde)} al ${f(v.hasta)} · ${D.dias.length} días · ${v.tramos.map(t=>t.destino).join(" → ")}`;
-    $("dl-dest").innerHTML = [...new Set(D.ideas.map(x=>x.destino).concat(v.tramos.map(t=>t.destino)))]
-      .filter(Boolean).map(x=>`<option value="${esc(x)}">`).join("");
-    render();
-  }catch(e){ $("cont").innerHTML = '<div class="empty">No se pudo cargar.<br>'+e.message+'</div>'; }
+/* ---------- mapa ---------- */
+function initMapa(){
+  if(map) return;
+  map=L.map("map",{zoomControl:true,attributionControl:false}).setView([20.85,-86.95],8);
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",{maxZoom:19}).addTo(map);
+}
+function pinIcon(color,ico){
+  return L.divIcon({className:"",html:`<div style="background:${color};width:26px;height:26px;
+    border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid #0a0e14;
+    display:grid;place-items:center;box-shadow:0 2px 8px rgba(0,0,0,.5)">
+    <span style="transform:rotate(45deg);font-size:12px">${ico}</span></div>`,
+    iconSize:[26,26],iconAnchor:[13,26],popupAnchor:[0,-24]});
+}
+function pintarMapa(){
+  if(!D)return; initMapa();
+  Object.values(capas).forEach(c=>map.removeLayer(c)); capas={};
+  const T=D.taxonomia, pts=D.puntos, bounds=[];
+  const grupos={parada:{label:"Destinos",ico:"📍",color:"#22d3ee"},
+                hospedaje:{label:"Hospedajes",ico:"🏨",color:"#f472b6"}};
+  Object.entries(T).forEach(([k,v])=>grupos[k]={label:v.label,ico:v.ico,color:v.color});
+  Object.entries(grupos).forEach(([k,g])=>{
+    const ms=pts.filter(p=>p.cat===k).map(p=>{
+      bounds.push([p.lat,p.lon]);
+      return L.marker([p.lat,p.lon],{icon:pinIcon(g.color,g.ico)})
+        .bindPopup(`<b>${esc(p.nombre)}</b>${p.sub?"<br><small>"+esc(p.sub)+"</small>":""}
+          <br><a href="${gmaps(p)}" target="_blank" style="color:#22d3ee">Abrir en Google Maps ↗</a>`);
+    });
+    if(ms.length){ capas[k]=L.layerGroup(ms); if(!ocultas.has(k)) capas[k].addTo(map); }
+  });
+  $("leyenda").innerHTML=Object.entries(grupos).filter(([k])=>capas[k])
+    .map(([k,g])=>`<div class="lg ${ocultas.has(k)?"off":""}" data-c="${k}">
+      <span class="dot" style="background:${g.color}"></span>${g.label}</div>`).join("");
+  $("leyenda").querySelectorAll(".lg").forEach(el=>el.addEventListener("click",()=>{
+    const k=el.dataset.c;
+    if(ocultas.has(k)){ocultas.delete(k);capas[k].addTo(map);el.classList.remove("off");}
+    else{ocultas.add(k);map.removeLayer(capas[k]);el.classList.add("off");}
+  }));
+  if(bounds.length) map.fitBounds(bounds,{padding:[35,35],maxZoom:11});
 }
 
-function itemHtml(i, opts={}){
-  const cls = i.estado==="descartado"?"desc":(i.estado==="hecho"?"hecho":"");
-  const meta = [];
-  if(opts.fecha && i.fecha) meta.push("📅 "+i.fecha.split("-").reverse().slice(0,2).join("/"));
-  if(i.hora) meta.push("🕐 "+i.hora);
-  if(i.destino && opts.destino!==false) meta.push("📍 "+esc(i.destino));
-  if(i.direccion) meta.push(esc(i.direccion));
+/* ---------- carga ---------- */
+async function load(){
+  try{
+    D=await (await fetch(BACKEND+"/viajes/"+SLUG)).json();
+    const v=D.viaje;
+    $("vnom").textContent=v.nombre;
+    $("vsub").textContent=`${fmt(v.desde)} – ${fmt(v.hasta)} · ${v.dias_total} días`;
+    $("f-cat").innerHTML=Object.entries(D.taxonomia).map(([k,c])=>
+      `<option value="${k}">${c.ico} ${c.label}</option>`).join("");
+    $("dl").innerHTML=[...new Set(D.lugares.map(l=>l.destino)
+      .concat(v.paradas.map(p=>p.destino)))].filter(Boolean)
+      .map(x=>`<option value="${esc(x)}">`).join("");
+    pintarMapa(); render();
+  }catch(e){ $("cont").innerHTML='<div class="empty">No se pudo cargar.<br>'+e.message+'</div>'; }
+}
+
+function itemHtml(i,o={}){
+  const T=D.taxonomia[i.categoria]||D.taxonomia.otro;
+  const cls=i.estado==="descartado"?"desc":(i.estado==="hecho"?"hecho":"");
+  const m=[];
+  if(o.fecha&&i.fecha) m.push("📅 "+fmt(i.fecha));
+  if(i.hora) m.push("🕐 "+i.hora);
+  if(i.destino&&o.destino!==false) m.push("📍 "+esc(i.destino));
+  if(i.direccion) m.push(esc(i.direccion));
   return `<div class="it ${cls}" data-id="${i.id}">
-    <div class="tx"><span>${ICO[i.categoria]||"📎"}</span><span>${esc(i.text)}</span></div>
-    ${meta.length?`<div class="meta">${meta.join(" · ")}</div>`:""}
-    ${i.nota?`<div class="nota">${esc(i.nota)}</div>`:""}
+    <div class="tx"><span>${T.ico}</span><span>${esc(i.text)}</span></div>
+    ${m.length?`<div class="m">${m.join(" · ")}</div>`:""}
+    ${i.nota?`<div class="nt">${esc(i.nota)}</div>`:""}
     <div class="acts">
-      <a class="map" href="${mapUrl(i)}" target="_blank" rel="noopener">🗺 Mapa</a>
+      <a class="map" href="${gmaps(i)}" target="_blank" rel="noopener">🗺</a>
       ${i.tipo==="pendiente"
-        ? `<button data-a="${i.estado==="hecho"?"wishlist":"hecho"}" class="${i.estado==="hecho"?"on":""}">${i.estado==="hecho"?"↺ Reabrir":"✓ Hecho"}</button>`
-        : `<button data-a="confirmado" class="${i.estado==="confirmado"?"on":""}">✅</button>
-           <button data-a="descartado" class="${i.estado==="descartado"?"on":""}">🗂</button>`}
-      <button data-a="edit">✏️</button>
-      <button data-a="del">🗑</button>
+        ?`<button data-a="${i.estado==="hecho"?"wishlist":"hecho"}" class="${i.estado==="hecho"?"on":""}">${i.estado==="hecho"?"↺":"✓ Hecho"}</button>`
+        :`<button data-a="confirmado" class="${i.estado==="confirmado"?"on":""}">✅</button>
+          <button data-a="descartado" class="${i.estado==="descartado"?"on":""}">🗂</button>`}
+      <button data-a="edit">✏️</button><button data-a="del">🗑</button>
     </div></div>`;
 }
 
 function render(){
-  if(!D) return;
-  const c = $("cont");
-  if(vista==="itin"){
-    c.innerHTML = D.dias.map(d=>{
-      const t = d.tramo||{};
-      return `<div class="dia ${abiertos.has(d.fecha)?"open":""}" data-f="${d.fecha}">
-        <div class="dhead">
-          <div class="dnum"><b>${d.n}</b><span>${d.dow}</span></div>
-          <div class="dinfo">
-            <div class="f">${d.fecha.split("-").reverse().slice(0,2).join("/")}</div>
-            <div class="h">${t.destino?"🏨 "+esc(t.destino):"—"}
-              ${d.checkin?'<span class="badge b-in">CHECK-IN</span>':""}
-              ${d.checkout?'<span class="badge b-out">CHECK-OUT</span>':""}
-            </div></div>
-          <div class="cnt">${d.items.length?d.items.length+" ▾":"＋"}</div>
-        </div>
-        <div class="dbody">
-          ${t.hotel?`<div class="hotel"><div class="n">🏨 ${esc(t.hotel)}</div>
-            <div class="d">${esc(t.direccion||"")}<br>${esc(t.nota||"")}</div>
-            <div class="acts"><a class="map" href="https://www.google.com/maps/search/?api=1&query=${t.lat},${t.lon}" target="_blank" rel="noopener">🗺 Ver hotel en el mapa</a></div>
-            </div>`:""}
-          ${d.items.length ? d.items.map(i=>itemHtml(i,{destino:false})).join("")
-            : '<div class="empty" style="padding:16px">Día libre. Tocá ➕ para agendar algo.</div>'}
+  if(!D)return; const c=$("cont");
+
+  if(vista==="resumen"){
+    c.innerHTML='<h2 class="sec">Itinerario · los transportes son los bloques entre paradas</h2>'
+      + D.itinerario.map(b=>{
+      if(b.kind==="transporte"){
+        const t=D.tipos_transporte[b.tipo]||{ico:"🚗",label:b.tipo};
+        return `<div class="tr"><div class="ico">${t.ico}</div><div class="c">
+          <div class="t">${t.label.toUpperCase()}${b.duracion?" · "+esc(b.duracion):""}</div>
+          ${b.detalle?`<div class="d">${esc(b.detalle)}</div>`:""}
+          ${b.fecha?`<div class="n">📅 ${fmt(b.fecha)}${b.hora?" · "+b.hora:""}${b.codigo?" · "+esc(b.codigo):""}</div>`:""}
+          ${b.nota?`<div class="n">${esc(b.nota)}</div>`:""}
         </div></div>`;
-    }).join("") + (D.sin_fecha?`<div class="empty">💡 Tenés ${D.sin_fecha} ideas sin fecha en la solapa Ideas.</div>`:"");
+      }
+      const h=b.hospedaje;
+      return `<div class="par ${abiertos.has("P:"+b.id)?"open":""}" data-p="${b.id}">
+        <div class="ph"><div class="pn">${b.n}</div>
+          <div class="pi"><b>${esc(b.destino)}</b>
+            <div class="x">${fmt(b.desde)} – ${fmt(b.hasta)} · ${b.noches} noches${b.items?" · "+b.items+" lugares":""}</div>
+          </div><span class="arrow">›</span></div>
+        <div class="pb">
+          ${h?`<div class="hot"><div class="n">🏨 ${esc(h.nombre)}</div>
+            <div class="d">${esc(h.direccion||"")}
+              ${h.checkin?`<br>Check-in ${h.checkin} · Check-out ${h.checkout||""}`:""}
+              ${h.tel?`<br>📞 ${esc(h.tel)}`:""}
+              ${h.nota?`<br>${esc(h.nota)}`:""}</div>
+            <div class="acts"><a class="map" href="${gmaps(h)}" target="_blank" rel="noopener">🗺 Ver en el mapa</a></div>
+          </div>`:""}
+          ${b.nota?`<div class="it"><div class="m">${esc(b.nota)}</div></div>`:""}
+        </div></div>`;
+    }).join("");
   }
-  else if(vista==="ideas"){
-    c.innerHTML = D.ideas.length ? D.ideas.map(dd=>{
-      const porCat={}; dd.items.forEach(i=>{(porCat[i.categoria] ||= []).push(i);});
-      return `<div class="dest ${abiertos.has("I:"+dd.destino)?"open":""}" data-i="${esc(dd.destino)}">
-        <div class="dhead2"><div><h2>${esc(dd.destino)}</h2>
-          <div class="cnt" style="margin-top:4px">${dd.items.length} items</div></div>
+
+  else if(vista==="lugares"){
+    c.innerHTML=D.lugares.length?D.lugares.map(l=>`
+      <div class="dest ${abiertos.has("L:"+l.destino)?"open":""}" data-l="${esc(l.destino)}">
+        <div class="dhh"><div><b>${esc(l.destino)}</b><div class="c">${l.total} lugares</div></div>
           <span class="arrow">›</span></div>
-        <div class="dbody" style="padding:0 15px 13px">
-          ${Object.keys(CATS).filter(k=>porCat[k]).map(k=>
-            `<div class="cat"><h3>${CATS[k]}</h3>${porCat[k].map(i=>itemHtml(i,{fecha:true,destino:false})).join("")}</div>`).join("")}
-        </div></div>`;
-    }).join("") : '<div class="empty">Todavía no hay ideas.</div>';
+        <div class="bd">${l.cats.map(ct=>`<div class="cat"><h3>${ct.ico} ${ct.label}</h3>
+          ${ct.items.map(i=>itemHtml(i,{fecha:true,destino:false})).join("")}</div>`).join("")}</div>
+      </div>`).join("")
+      :'<div class="empty">Sin lugares cargados todavía.</div>';
   }
+
+  else if(vista==="dias"){
+    c.innerHTML=`<h2 class="sec">${D.dias.length} jornadas · ${fmt(D.viaje.desde)} → ${fmt(D.viaje.hasta)}</h2>`
+      + D.dias.map(d=>{
+      const p=d.parada||{},h=d.hospedaje;
+      return `<div class="dia ${abiertos.has("D:"+d.fecha)?"open":""}" data-d="${d.fecha}">
+        <div class="dh"><div class="dn"><b>${d.n}</b><span>${d.dow}</span></div>
+          <div class="di"><div class="a">${d.corta}${p.destino?" · "+esc(p.destino):""}
+              ${d.llegada?'<span class="tag" style="margin-left:6px">LLEGADA</span>':""}</div>
+            <div class="b">${h?"Dormís en "+esc(h.nombre):"—"}${d.eventos.length?" · "+d.eventos.length+" eventos":""}</div>
+          </div><span class="arrow">›</span></div>
+        <div class="db">${d.eventos.length?d.eventos.map(e=>{
+          if(e.kind==="item") return `<div class="ev"><div class="h">${e.hora||"—"}</div>
+            <div class="x">${D.taxonomia[e.categoria]?.ico||"📎"} ${esc(e.text)}
+            ${e.nota?`<small>${esc(e.nota)}</small>`:""}</div></div>`;
+          if(e.kind==="checkin"||e.kind==="checkout") return `<div class="ev">
+            <div class="h">${e.hora||"—"}</div><div class="x">
+            <span class="tag ${e.kind==="checkout"?"o":""}">${e.kind==="checkout"?"CHECK-OUT":"CHECK-IN"}</span>
+            ${esc(e.text.replace(/^Check-(in|out) /,""))}</div></div>`;
+          const t=D.tipos_transporte[e.tipo]||{ico:"🚗",label:e.tipo};
+          return `<div class="ev"><div class="h">${e.hora||"—"}</div><div class="x">
+            <span class="tag t">${t.label.toUpperCase()}</span>${esc(e.detalle||"")}
+            ${e.nota?`<small>${esc(e.nota)}</small>`:""}</div></div>`;
+        }).join(""):'<div class="empty" style="padding:14px">Día libre. Tocá ➕ para agendar algo.</div>'}
+        </div></div>`;
+    }).join("")
+    + (D.sin_fecha?`<div class="empty">📍 Tenés ${D.sin_fecha} lugares sin fecha en la solapa Lugares.</div>`:"");
+  }
+
   else {
-    const p = D.pendientes;
-    c.innerHTML = p.length ? p.map(i=>itemHtml(i,{fecha:true})).join("")
-      : '<div class="empty">No hay pendientes.</div>';
+    c.innerHTML=D.pendientes.length?D.pendientes.map(i=>itemHtml(i,{fecha:true})).join("")
+      :'<div class="empty">No hay pendientes.</div>';
   }
   bind();
 }
 
 function bind(){
-  document.querySelectorAll(".dhead").forEach(h=>h.addEventListener("click",()=>{
-    const d=h.closest(".dia"), k=d.dataset.f;
-    d.classList.toggle("open"); d.classList.contains("open")?abiertos.add(k):abiertos.delete(k);
-  }));
-  document.querySelectorAll(".dhead2").forEach(h=>h.addEventListener("click",()=>{
-    const d=h.closest(".dest"), k="I:"+d.dataset.i;
-    d.classList.toggle("open"); d.classList.contains("open")?abiertos.add(k):abiertos.delete(k);
-  }));
-  document.querySelectorAll(".nota").forEach(n=>n.addEventListener("click",e=>{
+  const tog=(sel,cls,pre,attr)=>document.querySelectorAll(sel).forEach(h=>
+    h.addEventListener("click",()=>{
+      const el=h.closest(cls),k=pre+el.dataset[attr];
+      el.classList.toggle("open");
+      el.classList.contains("open")?abiertos.add(k):abiertos.delete(k);
+    }));
+  tog(".ph",".par","P:","p"); tog(".dhh",".dest","L:","l"); tog(".dh",".dia","D:","d");
+  document.querySelectorAll(".nt").forEach(n=>n.addEventListener("click",e=>{
     e.stopPropagation(); n.classList.toggle("full");
   }));
   document.querySelectorAll(".acts button").forEach(b=>b.addEventListener("click",async e=>{
     e.stopPropagation();
-    const id=b.closest(".it").dataset.id, a=b.dataset.a;
+    const id=b.closest(".it").dataset.id,a=b.dataset.a;
     try{
-      if(a==="del"){ if(!confirm("¿Borrar definitivamente?")) return; await api("/viajes/delete",{id}); }
+      if(a==="del"){ if(!confirm("¿Borrar definitivamente?"))return; await api("/viajes/delete",{id}); }
       else if(a==="edit"){ abrirEdit(id); return; }
       else await api("/viajes/update",{id,estado:a});
       load();
@@ -283,28 +381,26 @@ document.querySelectorAll(".tab[data-v]").forEach(t=>t.addEventListener("click",
   t.classList.add("on"); vista=t.dataset.v; render();
 }));
 
+function todos(){ return [...D.lugares.flatMap(l=>l.cats.flatMap(c=>c.items)), ...D.pendientes]; }
 function abrirEdit(id){
-  const i = [...D.dias.flatMap(d=>d.items), ...D.ideas.flatMap(x=>x.items), ...D.pendientes]
-            .find(x=>x.id===id);
-  if(!i) return;
+  const i=todos().find(x=>x.id===id); if(!i)return;
   editId=id; $("mtit").textContent="Editar";
-  $("f-text").value=i.text; $("f-tipo").value=i.tipo||"idea"; $("f-cat").value=i.categoria;
+  $("f-text").value=i.text; $("f-tipo").value=i.tipo||"lugar"; $("f-cat").value=i.categoria;
   $("f-dest").value=i.destino||""; $("f-fecha").value=i.fecha||""; $("f-hora").value=i.hora||"";
-  $("f-est").value=i.estado==="descartado"?"wishlist":i.estado; $("f-nota").value=i.nota||"";
-  $("modal").classList.add("on");
+  $("f-est").value=i.estado==="descartado"?"wishlist":(i.estado==="hecho"?"confirmado":i.estado);
+  $("f-nota").value=i.nota||""; $("modal").classList.add("on");
 }
 $("add").addEventListener("click",()=>{
   editId=null; $("mtit").textContent="Agregar";
   ["f-text","f-dest","f-fecha","f-hora","f-nota"].forEach(x=>$(x).value="");
-  $("f-tipo").value = vista==="pend" ? "pendiente" : "idea";
+  $("f-tipo").value=vista==="pend"?"pendiente":"lugar";
   $("modal").classList.add("on");
 });
 $("f-cancel").addEventListener("click",()=>$("modal").classList.remove("on"));
-$("modal").addEventListener("click",e=>{ if(e.target.id==="modal") $("modal").classList.remove("on"); });
-
+$("modal").addEventListener("click",e=>{ if(e.target.id==="modal")$("modal").classList.remove("on"); });
 $("f-save").addEventListener("click",async()=>{
   const m=$("f-msg");
-  if(!$("f-text").value.trim()){ m.className="msg err"; m.textContent="Falta el nombre"; return; }
+  if(!$("f-text").value.trim()){m.className="msg err";m.textContent="Falta el nombre";return;}
   const body={viaje:SLUG,text:$("f-text").value.trim(),tipo:$("f-tipo").value,
     categoria:$("f-cat").value,destino:$("f-dest").value.trim(),fecha:$("f-fecha").value,
     hora:$("f-hora").value,estado:$("f-est").value,nota:$("f-nota").value.trim(),addedBy:"web"};
@@ -314,10 +410,9 @@ $("f-save").addEventListener("click",async()=>{
     $("modal").classList.remove("on"); m.className="msg"; load();
   }catch(e){ m.className="msg err"; m.textContent=e.message; }
 });
-
 $("refresh").addEventListener("click",load);
 load();
-document.addEventListener("visibilitychange",()=>{ if(!document.hidden) load(); });
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden)load(); });
 </script>
 </body>
 </html>
