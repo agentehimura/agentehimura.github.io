@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mexico 2027 - Edu y Magui</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+  html,body{margin:0;padding:0;height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif}
+  #map{height:100%;width:100%;background:#aad3df}
+  .hdr{position:absolute;top:10px;left:56px;right:10px;z-index:1000;background:rgba(255,255,255,.96);
+       padding:8px 14px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.25);font-size:13px;max-width:330px}
+  .hdr b{font-size:16px;color:#0b6b3a}
+  .leg{position:absolute;bottom:18px;left:10px;z-index:1000;background:rgba(255,255,255,.96);
+       padding:10px 13px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.25);font-size:13px;line-height:1.9}
+  .leg i{display:inline-block;width:22px;vertical-align:middle;margin-right:6px}
+  .leg i svg{width:100%;height:auto;display:block}
+  .pop b{font-size:15px;color:#0b3d6b}
+  .pop p{margin:6px 0 0;font-size:13px;line-height:1.5}
+  .pop a{display:inline-block;margin-top:9px;font-size:13px;background:#1a73e8;color:#fff;
+         padding:6px 11px;border-radius:6px;text-decoration:none}
+  .leaflet-popup-content{margin:12px 14px;max-width:250px}
+</style>
+</head>
+<body>
+<div class="hdr"><b>MEXICO 2027</b><br>10 al 27 de enero &middot; Edu y Magui<br>
+<span style="color:#666">7 dias Cancun + 7 dias Playa del Carmen</span></div>
+<div id="map"></div>
+<div class="leg">
+  <div><i><svg xmlns='http://www.w3.org/2000/svg' width='34' height='40' viewBox='0 0 34 40'><path d='M17 40c-1 0-1.6-.6-1.7-1.5L13.6 22h6.8l-1.7 16.5C18.6 39.4 18 40 17 40z' fill='#8a5a2b'/><circle cx='17' cy='19' r='2.6' fill='#e0a32e'/><path d='M17 19C13 11 7 8 2 9c4-6 12-5 15 7z' fill='#1f8a3c'/><path d='M17 19c4-8 10-11 15-10-4-6-12-5-15 7z' fill='#25a34a'/><path d='M17 19C14 10 15 4 19 0c5 3 5 11 -2 19z' fill='#1f8a3c'/><path d='M17 19c-3-9-9-12-15-11 2-5 11-7 15 11z' fill='#2bb757'/></svg></i> Plan Cancun (primeros 7 dias)</div>
+  <div><i><svg xmlns='http://www.w3.org/2000/svg' width='36' height='34' viewBox='0 0 36 34'><path d='M18 2 34 31H2z' fill='#c98b3e'/><path d='M18 2 34 31H18z' fill='#a86f2c'/><g fill='#8a5a22'><rect x='9' y='24' width='18' height='2.2'/><rect x='11.5' y='19' width='13' height='2.2'/><rect x='14' y='14' width='8' height='2.2'/></g><rect x='15.4' y='26' width='5.2' height='5' fill='#5c3c16'/><rect x='2' y='31' width='32' height='2.6' fill='#7d5220'/></svg></i> Plan Playa del Carmen</div>
+  <div><i><svg xmlns='http://www.w3.org/2000/svg' width='30' height='36' viewBox='0 0 30 36'><path d='M15 36c-6-9-13-13-13-21A13 13 0 0 1 28 15c0 8-7 12-13 21z' fill='#d92d20'/><circle cx='15' cy='14' r='6' fill='#fff'/></svg></i> Alojamiento base</div>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+var CANCUN = [{"n": "Parque Xavage", "lat": 20.994676, "lon": -86.8626729, "d": "Rafting, camiones monstruo, tirolesa Superman. ~150 USD. OJO: el m&aacute;s extremo de todos."}, {"n": "Isla Holbox", "lat": 21.5221343, "lon": -87.3783129, "d": "Tour de d&iacute;a: lancha, carrito de golf, comida y tiempo libre. ~90-110 USD."}, {"n": "Chich&eacute;n Itz&aacute; Deluxe + cenote", "lat": 20.6828763, "lon": -88.5687184, "d": "Grupo reducido, acceso temprano, gu&iacute;a certificado, cenote privado y almuerzo gourmet. ~80-120 USD."}, {"n": "Isla Contoy", "lat": 21.4972416, "lon": -86.79392, "d": "Parque Nacional, solo 200 personas por d&iacute;a. Fauna y esn&oacute;rquel. Va combinado con Isla Mujeres. ~110-140 USD."}, {"n": "Isla Mujeres", "lat": 21.2371906, "lon": -86.7350001, "d": "Parada del combinado con Isla Contoy."}, {"n": "Laguna Nichupt&eacute; (Jungle Tour)", "lat": 21.0961104, "lon": -86.7915858, "d": "Maneja&#769;s tu propia lancha r&aacute;pida por los manglares + esn&oacute;rquel en arrecife y MUSA. ~60-75 USD."}, {"n": "MUSA / Punta Nizuc", "lat": 21.0140166, "lon": -86.7905507, "d": "Museo Subacu&aacute;tico de Arte. Se puede ver con esn&oacute;rquel en el Jungle Tour (sin bucear)."}, {"n": "Las Coloradas", "lat": 21.6079391, "lon": -87.9899852, "d": "Lagunas rosa brillante. D&iacute;a completo junto con R&iacute;o Lagartos. ~120-140 USD."}, {"n": "R&iacute;o Lagartos", "lat": 21.5204972, "lon": -88.1331538, "d": "Safari en lancha por manglares: cocodrilos y colonias de flamencos."}, {"n": "Playa Delfines", "lat": 21.0619642, "lon": -86.778583, "d": "Playa p&uacute;blica de Canc&uacute;n."}, {"n": "Playa Langosta", "lat": 21.1451126, "lon": -86.7817023, "d": "Playa p&uacute;blica de Canc&uacute;n."}, {"n": "Playa Tortugas", "lat": 21.139726, "lon": -86.7693058, "d": "Playa p&uacute;blica de Canc&uacute;n."}];
+var PLAYA  = [{"n": "Parque Xplor", "lat": 20.5938187, "lon": -87.1224711, "d": "Tirolesas m&aacute;s altas de la Riviera, r&iacute;os subterr&aacute;neos, veh&iacute;culos anfibios. Todo incluido ~140-150 USD."}, {"n": "Sian Ka'an (Reserva UNESCO)", "lat": 19.6040729, "lon": -87.6258019, "d": "Patrimonio de la Humanidad UNESCO. En maya significa 'donde nace el cielo'."}, {"n": "Punta Allen (4x4 + lancha)", "lat": 19.800666, "lon": -87.477512, "d": "Selva en 4x4 y lancha: delfines, tortugas gigantes y manat&iacute;es. ~130-150 USD."}, {"n": "Muyil &mdash; Sian Ka'an tranquilo &#9733; RECOMENDADO", "lat": 20.07778, "lon": -87.61528, "d": "&#9733; LA OPCI&Oacute;N M&Aacute;S TRANQUILA: caminata plana entre templos mayas + lancha por lagunas turquesa + el FLOTE de 20-30 min en el canal maya con chaleco salvavidas. Cero esfuerzo f&iacute;sico. ~110-130 USD. Operador: M&eacute;xico Kan Tours."}, {"n": "R&iacute;o Secreto Plus", "lat": 20.5882314, "lon": -87.1339801, "d": "Cueva de cristal subterr&aacute;nea semiinundada + ciclismo en selva, rappel y show de luces. ~100-120 USD."}, {"n": "Ruinas de Tulum", "lat": 20.2145734, "lon": -87.42946, "d": "Ruinas frente al mar. Parte del tour Tulum VIP + Cob&aacute; + cenote. ~110-130 USD."}, {"n": "Zona Arqueol&oacute;gica Cob&aacute;", "lat": 20.4887815, "lon": -87.7260038, "d": "Se explora en bicicleta por la selva."}, {"n": "Isla Cozumel", "lat": 20.4320599, "lon": -86.9206906, "d": "Ferry desde Playa + catamar&aacute;n. Arrecifes Palancar y Colombia. ~80-100 USD."}, {"n": "El Cielo (Cozumel)", "lat": 20.4452778, "lon": -86.9897222, "d": "Banco de arena blanca en medio del mar, lleno de estrellas de mar gigantes."}, {"n": "Emotions Native Park", "lat": 20.7016, "lon": -87.029, "d": "Cuatrimotos por la selva, puentes colgantes, tirolesas, bendici&oacute;n maya y cenote. ~80-90 USD. Carr. Federal Km 285. UBICACI&Oacute;N APROXIMADA."}, {"n": "Parque Xel-H&aacute;", "lat": 20.3172833, "lon": -87.3568194, "d": "El acuario natural m&aacute;s grande. Esn&oacute;rquel ilimitado, toboganes, tirolesas acu&aacute;ticas. Todo incluido ~110-130 USD."}, {"n": "Parque Xcaret", "lat": 20.5819731, "lon": -87.1216693, "d": "Cultura mexicana. Show 'Xcaret M&eacute;xico Espectacular' 19h. Entrada Plus ~3.299 MXN. Abre 8:30 a 22:30."}, {"n": "5ta Avenida", "lat": 20.634724, "lon": -87.0666549, "d": "Peatonal principal de Playa del Carmen."}, {"n": "Cenote Ed&eacute;n", "lat": 20.4897067, "lon": -87.2520493, "d": "Cenote abierto cerca de Playa del Carmen."}, {"n": "Cenote Cristalino", "lat": 20.4904105, "lon": -87.2502846, "d": "Cenote abierto, al lado del Ed&eacute;n."}, {"n": "Playa Xpu-Ha", "lat": 20.475404, "lon": -87.2556387, "d": "Playa tranquila entre Playa del Carmen y Tulum."}, {"n": "Akumal", "lat": 20.398797, "lon": -87.3173404, "d": "Playa de tortugas marinas."}, {"n": "Playa Para&iacute;so (Tulum)", "lat": 20.2040355, "lon": -87.4312713, "d": "Una de las mejores playas de Tulum."}, {"n": "Cenote Dos Ojos", "lat": 20.3247342, "lon": -87.3906066, "d": "Cenote de caverna, de los m&aacute;s famosos."}, {"n": "Cenote Coraz&oacute;n del Para&iacute;so", "lat": 20.1830432, "lon": -87.5182917, "d": "Cenote en Tulum."}, {"n": "Cenote Cristal", "lat": 20.200314, "lon": -87.5006004, "d": "Cenote abierto en Tulum."}, {"n": "Caleta Tankah", "lat": 20.231678, "lon": -87.4180992, "d": "Caleta con cenote, cerca de Tulum."}, {"n": "Laguna Kaan Luum", "lat": 20.1625884, "lon": -87.5540147, "d": "Laguna turquesa con un cenote profundo en el centro."}];
+var BASES  = [{"n": "BASE 1 &mdash; Canc&uacute;n", "lat": 21.1527467, "lon": -86.8425761, "d": "Primeros 7 d&iacute;as: 10 al 17 de enero."}, {"n": "BASE 2 &mdash; Playa del Carmen", "lat": 20.6462848, "lon": -87.0807866, "d": "&Uacute;ltimos d&iacute;as: 17 al 27 de enero."}];
+var SVG = {
+  palmera: "<svg xmlns='http://www.w3.org/2000/svg' width='34' height='40' viewBox='0 0 34 40'><path d='M17 40c-1 0-1.6-.6-1.7-1.5L13.6 22h6.8l-1.7 16.5C18.6 39.4 18 40 17 40z' fill='#8a5a2b'/><circle cx='17' cy='19' r='2.6' fill='#e0a32e'/><path d='M17 19C13 11 7 8 2 9c4-6 12-5 15 7z' fill='#1f8a3c'/><path d='M17 19c4-8 10-11 15-10-4-6-12-5-15 7z' fill='#25a34a'/><path d='M17 19C14 10 15 4 19 0c5 3 5 11 -2 19z' fill='#1f8a3c'/><path d='M17 19c-3-9-9-12-15-11 2-5 11-7 15 11z' fill='#2bb757'/></svg>",
+  piramide: "<svg xmlns='http://www.w3.org/2000/svg' width='36' height='34' viewBox='0 0 36 34'><path d='M18 2 34 31H2z' fill='#c98b3e'/><path d='M18 2 34 31H18z' fill='#a86f2c'/><g fill='#8a5a22'><rect x='9' y='24' width='18' height='2.2'/><rect x='11.5' y='19' width='13' height='2.2'/><rect x='14' y='14' width='8' height='2.2'/></g><rect x='15.4' y='26' width='5.2' height='5' fill='#5c3c16'/><rect x='2' y='31' width='32' height='2.6' fill='#7d5220'/></svg>",
+  hotel: "<svg xmlns='http://www.w3.org/2000/svg' width='30' height='36' viewBox='0 0 30 36'><path d='M15 36c-6-9-13-13-13-21A13 13 0 0 1 28 15c0 8-7 12-13 21z' fill='#d92d20'/><circle cx='15' cy='14' r='6' fill='#fff'/></svg>"
+};
+
+var map = L.map('map').setView([20.75,-87.4], 8);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  {maxZoom:19, attribution:'&copy; OpenStreetMap'}).addTo(map);
+
+function mkIcon(svg, w, h){
+  return L.divIcon({html:svg, className:'pinwrap', iconSize:[w,h], iconAnchor:[w/2,h], popupAnchor:[0,-h+4]});
+}
+function add(list, svg, w, h){
+  var group = [];
+  list.forEach(function(p){
+    var g = 'https://www.google.com/maps/search/?api=1&query='+p.lat+','+p.lon;
+    var htm = '<div class="pop"><b>'+p.n+'</b><p>'+p.d+'</p>'+
+              '<a href="'+g+'" target="_blank" rel="noopener">Abrir en Google Maps</a></div>';
+    var m = L.marker([p.lat,p.lon], {icon:mkIcon(svg,w,h), title:p.n}).addTo(map).bindPopup(htm);
+    group.push(m);
+  });
+  return group;
+}
+var a = add(CANCUN, SVG.palmera, 34, 40);
+var b = add(PLAYA,  SVG.piramide, 36, 34);
+var c = add(BASES,  SVG.hotel,   30, 36);
+
+var all = a.concat(b).concat(c);
+map.fitBounds(L.featureGroup(all).getBounds().pad(0.12));
+</script>
+</body>
+</html>
